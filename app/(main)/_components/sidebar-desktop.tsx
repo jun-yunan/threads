@@ -38,8 +38,8 @@ interface SidebarDesktopProps {}
 
 const SidebarDesktop: FunctionComponent<SidebarDesktopProps> = () => {
   return (
-    <div className="flex flex-col items-center justify-between h-full px-3 py-4 bg-neutral-800 text-white">
-      <Link href="/dashboard" className="text-2xl font-bold animate-pulse">
+    <div className="fixed hidden top-0 bottom-0 z-20 left-0 md:flex flex-col items-center justify-between h-full px-3 py-4 bg-neutral-800 text-white">
+      <Link href="/dashboard" className="text-lg font-bold animate-pulse">
         <p>NAKIET</p>
       </Link>
       <div className="flex flex-col gap-y-6">

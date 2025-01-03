@@ -1,9 +1,6 @@
-import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { FunctionComponent } from 'react';
-import { AppSidebar } from './_components/app-sidebar';
 import Header from './_components/header';
 import SidebarDesktop from './_components/sidebar-desktop';
-import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { DialogCreateNewFeed } from './_components/dialogs/dialog-create-new-feed';
 
@@ -15,7 +12,7 @@ const MainLayout: FunctionComponent<MainLayoutProps> = ({ children }) => {
   return (
     <div className="relative flex w-full h-full bg-neutral-900 justify-between">
       <SidebarDesktop />
-      <main className="w-full h-full flex flex-col items-center  text-white">
+      <main className="relative w-full h-full flex flex-col items-center  text-white">
         <Header />
         {children}
       </main>

@@ -1,13 +1,18 @@
 import { api } from '@/convex/_generated/api';
-import { Id } from '@/convex/_generated/dataModel';
 import { useMutation } from 'convex/react';
 import { useCallback, useMemo, useState } from 'react';
+import { Doc } from '@/convex/_generated/dataModel';
 
 type RequestType = {
-  messageId: Id<'messages'>;
+  content: string;
+  published: boolean;
 };
 
-type ResponseType = string | null;
+type ResponseType =
+  | (string & {
+      __tableName: 'posts';
+    })
+  | null;
 
 type Options = {
   onSuccess?: (response: ResponseType) => void;
@@ -16,7 +21,7 @@ type Options = {
   throwError?: boolean;
 };
 
-export const useDeleteMessage = () => {
+export const useCreatePost = () => {
   const [data, setData] = useState<ResponseType>(null);
   const [error, setError] = useState<Error | null>(null);
   const [status, setStatus] = useState<
@@ -28,7 +33,7 @@ export const useDeleteMessage = () => {
   const isError = useMemo(() => status === 'error', [status]);
   const isSettled = useMemo(() => status === 'settled', [status]);
 
-  const mutation = useMutation(api.message.deleteMessage);
+  const mutation = useMutation(api.posts.create);
 
   const mutate = useCallback(
     async (values: RequestType, options?: Options) => {
@@ -37,7 +42,10 @@ export const useDeleteMessage = () => {
         setError(null);
         setStatus('pending');
 
-        const response = await mutation({ messageId: values.messageId });
+        const response = await mutation({
+          content: values.content,
+          published: values.published,
+        });
         options?.onSuccess?.(response);
         return response;
       } catch (error) {

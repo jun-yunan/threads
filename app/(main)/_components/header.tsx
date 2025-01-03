@@ -15,7 +15,7 @@ interface HeaderProps {}
 
 const Header: FunctionComponent<HeaderProps> = () => {
   return (
-    <div className="w-full h-16 flex items-center justify-center">
+    <div className="fixed top-0 right-0 left-0 z-10 bg-neutral-900 w-full h-16 flex items-center justify-center">
       <DropdownMenu>
         <DropdownMenuTrigger>
           <div className="flex items-center gap-x-2 text-lg font-semibold">

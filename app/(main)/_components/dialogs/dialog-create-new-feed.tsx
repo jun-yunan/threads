@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -25,24 +24,25 @@ import {
   FormItem,
   FormMessage,
 } from '@/components/ui/form';
-import { FileImage, MapPin } from 'lucide-react';
-import { cn } from '@/lib/utils';
-// import
+import { FileImage, Loader2, MapPin } from 'lucide-react';
+import { useCreatePost } from '@/features/post/api/use-create-post';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
 const schemaCreateNewFeed = z.object({
   content: z.string().min(1).max(500),
 });
 
 export function DialogCreateNewFeed({
-  onOpen,
-  open,
   children,
 }: {
-  open?: boolean;
-  onOpen?: () => void;
   children?: React.ReactNode;
 }) {
   const currentUser = useQuery(api.user.getCurrentUser);
+
+  const [openDialog, setOpenDialog] = useState(false);
+
+  const { mutate: mutationCreatePost, isPending } = useCreatePost();
 
   const form = useForm<z.infer<typeof schemaCreateNewFeed>>({
     defaultValues: {
@@ -51,10 +51,19 @@ export function DialogCreateNewFeed({
     resolver: zodResolver(schemaCreateNewFeed),
   });
 
-  console.log(currentUser);
-
   const onSubmit = async (data: z.infer<typeof schemaCreateNewFeed>) => {
-    console.log(data);
+    mutationCreatePost({ content: data.content, published: true })
+      .then((data) => {
+        if (data) {
+          setOpenDialog(false);
+          form.reset();
+          toast.success('Đăng bài thành công');
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+        toast.error('Đăng bài thất bại');
+      });
   };
   const handleInputChange = (event: any) => {
     const { value, selectionStart } = event.target;
@@ -64,7 +73,7 @@ export function DialogCreateNewFeed({
     }
   };
   return (
-    <Dialog open={open} onOpenChange={onOpen}>
+    <Dialog open={openDialog} onOpenChange={setOpenDialog}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px] lg:max-w-[600px]">
         <DialogHeader>
@@ -130,7 +139,13 @@ export function DialogCreateNewFeed({
               <Button type="button" variant="ghost" size="default">
                 Bất kỳ ai cũng có thể trả lời trích dẫn
               </Button>
-              <Button type="submit">Đăng</Button>
+              <Button disabled={isPending} type="submit">
+                {isPending ? (
+                  <Loader2 className="animate-spin"></Loader2>
+                ) : (
+                  'Đăng'
+                )}
+              </Button>
             </div>
           </form>
         </Form>
