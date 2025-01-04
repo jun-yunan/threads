@@ -6,9 +6,11 @@ export const create = mutation({
   args: {
     content: v.string(),
     published: v.boolean(),
+    storageId: v.optional(v.id('_storage')),
+    formatFile: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const { content, published } = args;
+    const { content, published, storageId, formatFile } = args;
 
     if (!content || !published) {
       throw new ConvexError('Content and published are required');
@@ -33,6 +35,8 @@ export const create = mutation({
       author: currentUser._id,
       content,
       published,
+      formatFile,
+      storageId,
       updatedAt: Date.now(),
     });
 
@@ -83,9 +87,14 @@ export const get = query({
             return null;
           }
 
+          const file = post.storageId
+            ? await ctx.storage.getUrl(post.storageId)
+            : undefined;
+
           return {
             ...post,
             author,
+            file,
           };
         }),
       ),

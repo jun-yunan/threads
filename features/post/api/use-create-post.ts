@@ -1,11 +1,13 @@
 import { api } from '@/convex/_generated/api';
 import { useMutation } from 'convex/react';
 import { useCallback, useMemo, useState } from 'react';
-import { Doc } from '@/convex/_generated/dataModel';
+import { Doc, Id } from '@/convex/_generated/dataModel';
 
 type RequestType = {
   content: string;
   published: boolean;
+  storageId?: Id<'_storage'>;
+  formatFile?: string;
 };
 
 type ResponseType =
@@ -45,6 +47,8 @@ export const useCreatePost = () => {
         const response = await mutation({
           content: values.content,
           published: values.published,
+          formatFile: values.formatFile,
+          storageId: values.storageId,
         });
         options?.onSuccess?.(response);
         return response;

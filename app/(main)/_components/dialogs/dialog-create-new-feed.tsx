@@ -24,10 +24,15 @@ import {
   FormItem,
   FormMessage,
 } from '@/components/ui/form';
-import { FileImage, Loader2, MapPin } from 'lucide-react';
+import { FileImage, Loader2, MapPin, Smile, X } from 'lucide-react';
 import { useCreatePost } from '@/features/post/api/use-create-post';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { useCreateNewFeed } from '@/hooks/useCreateNewFeed';
+import Image from 'next/image';
+import { EmojiPopover } from '../emoji-popover';
+import { useGenerateUpload } from '@/features/upload/api/use-generate-upload';
+import { Id } from '@/convex/_generated/dataModel';
 
 const schemaCreateNewFeed = z.object({
   content: z.string().min(1).max(500),
@@ -40,9 +45,15 @@ export function DialogCreateNewFeed({
 }) {
   const currentUser = useQuery(api.user.getCurrentUser);
 
-  const [openDialog, setOpenDialog] = useState(false);
+  const [isPending, setIsPending] = useState(false);
 
-  const { mutate: mutationCreatePost, isPending } = useCreatePost();
+  const { openDialog, onOpenChange } = useCreateNewFeed();
+
+  const [file, setFile] = useState<File | null>(null);
+
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  const { mutate: mutationCreatePost } = useCreatePost();
 
   const form = useForm<z.infer<typeof schemaCreateNewFeed>>({
     defaultValues: {
@@ -50,20 +61,47 @@ export function DialogCreateNewFeed({
     },
     resolver: zodResolver(schemaCreateNewFeed),
   });
-
+  const { mutate: generateUploadUrl } = useGenerateUpload();
   const onSubmit = async (data: z.infer<typeof schemaCreateNewFeed>) => {
-    mutationCreatePost({ content: data.content, published: true })
-      .then((data) => {
-        if (data) {
-          setOpenDialog(false);
-          form.reset();
-          toast.success('Đăng bài thành công');
+    try {
+      setIsPending(true);
+      let fileStorageId: Id<'_storage'> | undefined;
+      if (file) {
+        const postUrl = await generateUploadUrl({}, { throwError: true });
+
+        if (!postUrl) {
+          throw new Error('Url not found');
         }
-      })
-      .catch((error) => {
-        console.log(error);
-        toast.error('Đăng bài thất bại');
+
+        const result = await fetch(postUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': file.type },
+          body: file,
+        });
+
+        if (!result.ok) {
+          throw new Error('Error uploading file');
+        }
+
+        const { storageId } = await result.json();
+        fileStorageId = storageId;
+      }
+      mutationCreatePost({
+        content: data.content,
+        published: true,
+        formatFile: file?.type,
+        storageId: fileStorageId,
       });
+
+      onOpenChange(false);
+      form.reset();
+      toast.success('Đăng bài thành công');
+    } catch (error) {
+      console.log(error);
+      toast.error('Đăng bài thất bại');
+    } finally {
+      setIsPending(false);
+    }
   };
   const handleInputChange = (event: any) => {
     const { value, selectionStart } = event.target;
@@ -72,10 +110,25 @@ export function DialogCreateNewFeed({
       form.setValue('content', value);
     }
   };
+
+  const onEmojiSelect = (emoji: any) => {
+    form.setValue('content', form.getValues('content') + emoji.native);
+  };
+
+  useEffect(() => {
+    if (!openDialog) {
+      form.reset();
+      setFile(null);
+      if (inputRef.current) {
+        inputRef.current.value = '';
+      }
+    }
+  }, [form, openDialog]);
+
   return (
-    <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+    <Dialog open={openDialog} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] lg:max-w-[600px]">
+      <DialogContent className="sm:max-w-[425px] lg:max-w-[600px] max-h-[90vh]">
         <DialogHeader>
           <DialogTitle>New Feed</DialogTitle>
         </DialogHeader>
@@ -101,33 +154,85 @@ export function DialogCreateNewFeed({
                       <FormControl>
                         <TextareaAutoSize
                           rows={1}
-                          maxRows={7}
+                          maxRows={6}
                           maxLength={500}
                           {...field}
                           onChange={handleInputChange}
                           onClick={handleInputChange}
                           placeholder="Có gì mới?"
-                          className="min-h-full w-full overflow-y-hidden resize-none border-0 outline-0 bg-card text-card-foreground placeholder:text-muted-foreground py-1.5"
+                          className="min-h-full w-full resize-none border-0 outline-0 bg-card text-card-foreground placeholder:text-muted-foreground py-1.5"
                         />
                       </FormControl>
                       <FormDescription>
-                        <p>{form.getValues('content').length}/500 Ký tự</p>
+                        {form.getValues('content').length}/500 Ký tự
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+                {file && (
+                  <div className="relative w-full h-[250px]">
+                    <Image
+                      src={URL.createObjectURL(file)}
+                      alt="image"
+                      width={300}
+                      height={300}
+                      className="w-full h-full rounded-lg object-cover"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute top-2 right-2 rounded-full"
+                      onClick={() => {
+                        setFile(null);
+                        if (inputRef.current) {
+                          inputRef.current.value = '';
+                        }
+                      }}
+                    >
+                      <X />
+                    </Button>
+                  </div>
+                )}
                 <div className="flex items-center gap-x-2">
-                  <Button type="button" variant="ghost" size="icon">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => inputRef.current?.click()}
+                  >
                     <FileImage />
                   </Button>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    ref={inputRef}
+                    onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      if (file) {
+                        setFile(file);
+                      }
+                    }}
+                  />
+                  <EmojiPopover onEmojiSelect={onEmojiSelect}>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="text-lg"
+                    >
+                      <Smile />
+                    </Button>
+                  </EmojiPopover>
                   <Button
                     type="button"
                     variant="ghost"
                     size="icon"
                     className="text-lg"
                   >
-                    #
+                    <p>#</p>
                   </Button>
                   <Button type="button" variant="ghost" size="icon">
                     <MapPin />
