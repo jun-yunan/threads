@@ -50,10 +50,16 @@ export function DialogFieldProfile({ children, form, type }: Props) {
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <Textarea rows={7} placeholder="Viết tiểu sử..." {...field} />
+                  <Textarea
+                    rows={7}
+                    maxLength={300}
+                    placeholder="Viết tiểu sử..."
+                    {...field}
+                  />
                 </FormControl>
                 <FormDescription>
-                  Tiểu sử của bạn sẽ hiển thị công khai.
+                  <p>{form.getValues('bio')?.length}/300 ký tự.</p>
+                  <p>Tiểu sử của bạn sẽ hiển thị công khai.</p>
                 </FormDescription>
                 <FormMessage />
               </FormItem>

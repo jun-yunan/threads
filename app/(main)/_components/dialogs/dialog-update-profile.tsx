@@ -13,7 +13,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-import { Lock, Plus, Trash, Upload } from 'lucide-react';
+import { Loader2, Lock, Plus, Trash, Upload } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import Link from 'next/link';
@@ -36,15 +36,9 @@ export function DialogUpdateProfile({
   currentUser,
 }: {
   children?: React.ReactNode;
-  currentUser?: Doc<'users'> | undefined;
+  currentUser?: Doc<'users'> | undefined | null;
 }) {
-  const {
-    isOpen,
-    onOpen,
-    type,
-    onClose,
-    data: { user },
-  } = useModalStore();
+  const { isOpen, type, onClose } = useModalStore();
 
   const { mutate: generateUploadUrl } = useGenerateUpload();
   const { mutate: mutationUpdateUser } = useUpdateUser();
@@ -79,13 +73,11 @@ export function DialogUpdateProfile({
   };
 
   useEffect(() => {
-    if (currentUser) {
-      form.setValue('bio', currentUser.bio);
-      form.setValue('link', currentUser.link);
-      form.setValue('name', currentUser.name);
-      form.setValue('username', currentUser.username);
-    }
-  }, [currentUser, form]);
+    form.setValue('bio', currentUser?.bio);
+    form.setValue('link', currentUser?.link);
+    form.setValue('name', currentUser?.name);
+    form.setValue('username', currentUser?.username);
+  }, [currentUser, form, isOpenDialog]);
 
   const onSubmit = async (data: z.infer<typeof schemaUpdateProfile>) => {
     if (!currentUser) return;
@@ -138,7 +130,7 @@ export function DialogUpdateProfile({
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px] lg:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Update Profile</DialogTitle>
+          <DialogTitle>Cập nhật hồ sơ cá nhân</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form
@@ -151,7 +143,7 @@ export function DialogUpdateProfile({
                 <div className="flex items-center gap-x-2">
                   <Lock className="w-5 h-5" />
                   <p className="text-base">
-                    {user?.name} ({user?.username})
+                    {currentUser?.name} ({currentUser?.username})
                   </p>
                 </div>
               </div>
@@ -177,11 +169,11 @@ export function DialogUpdateProfile({
                       />
                     ) : (
                       <AvatarImage
-                        src={user?.imageUrl}
+                        src={currentUser?.imageUrl}
                         className="object-cover"
                       />
                     )}
-                    <AvatarFallback>{user?.username}</AvatarFallback>
+                    <AvatarFallback>{currentUser?.username}</AvatarFallback>
                   </Avatar>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-52">
@@ -205,8 +197,8 @@ export function DialogUpdateProfile({
               <div className="cursor-pointer hover:bg-neutral-800 transition-all duration-500 p-2 rounded-lg flex w-full flex-col items-start gap-y-1">
                 <Label className="text-base font-semibold">Tiểu sử</Label>
 
-                {user?.bio ? (
-                  <p className="text-base">{user.bio}</p>
+                {currentUser?.bio ? (
+                  <p className="text-base">{currentUser.bio}</p>
                 ) : (
                   <div className="w-full flex items-center justify-start gap-x-2">
                     <Plus className="w-4 h-4" />
@@ -222,12 +214,12 @@ export function DialogUpdateProfile({
               <div className="cursor-pointer hover:bg-neutral-800 transition-all duration-500 p-2 rounded-lg flex w-full flex-col items-start gap-y-1">
                 <Label className="text-base font-semibold">Liên kết</Label>
 
-                {user?.link ? (
+                {currentUser?.link ? (
                   <Link
-                    href={user.link}
+                    href={currentUser.link}
                     className="hover:underline text-blue-500"
                   >
-                    {user.link}
+                    {currentUser.link}
                   </Link>
                 ) : (
                   <div className="w-full flex items-center justify-start gap-x-2">
@@ -238,11 +230,15 @@ export function DialogUpdateProfile({
               </div>
             </DialogFieldProfile>
             <Separator />
+            <Button
+              disabled={isPending}
+              type="submit"
+              className="text-base font-semibold py-7"
+            >
+              {isPending ? <Loader2 /> : 'Cập nhật'}
+            </Button>
           </form>
         </Form>
-        <Button type="submit" className="text-base font-semibold py-7">
-          Xong
-        </Button>
       </DialogContent>
     </Dialog>
   );

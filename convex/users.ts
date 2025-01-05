@@ -50,6 +50,10 @@ export const getCurrentUser = query({
       throw new ConvexError('User not found');
     }
 
+    // const generateImageUrl = user.imageStorageId
+    //   ? await context.storage.getUrl(user.imageStorageId)
+    //   : user.imageUrl;
+
     return user;
   },
 });
@@ -116,6 +120,13 @@ export const update = mutation({
       throw new ConvexError('Unauthorized');
     }
 
-    await context.db.patch(args.userId, args);
+    await context.db.patch(args.userId, {
+      name: args.name,
+      bio: args.bio,
+      username: args.username,
+      link: args.link,
+      imageStorageId: args.imageStorageId,
+      updatedAt: Date.now(),
+    });
   },
 });

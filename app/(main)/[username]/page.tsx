@@ -48,15 +48,20 @@ const ProfilePage: FunctionComponent<ProfilePageProps> = (props) => {
       <div className="w-full h-full flex flex-col">
         <div className="w-full flex-col flex gap-y-6 p-6">
           {user && (
-            <div className="w-full flex items-center justify-between">
-              <div className="flex flex-col items-start">
-                <p className="text-2xl font-bold">{user.name}</p>
-                <p className="text-base font-light">{user.username}</p>
+            <div className="w-full flex flex-col gap-y-2">
+              <div className="w-full flex items-center justify-between">
+                <div className="flex flex-col items-start justify-around">
+                  <p className="text-2xl font-bold">{user.name}</p>
+                  <p className="text-base font-light">{user.username}</p>
+                </div>
+                <Avatar className="w-20 h-20">
+                  <AvatarImage src={user.imageUrl!} className="object-cover" />
+                  <AvatarFallback>{user.username}</AvatarFallback>
+                </Avatar>
               </div>
-              <Avatar className="w-20 h-20">
-                <AvatarImage src={user.imageUrl!} className="object-cover" />
-                <AvatarFallback>{user.username}</AvatarFallback>
-              </Avatar>
+              <p className="text-sm text-ellipsis text-wrap break-words ">
+                {user.bio}
+              </p>
             </div>
           )}
           <div className="w-full flex items-center justify-between">
@@ -70,9 +75,9 @@ const ProfilePage: FunctionComponent<ProfilePageProps> = (props) => {
           {isCurrentUser ? (
             <Button
               variant="outline"
-              size="sm"
+              size="default"
               className="text-sm font-semibold"
-              onClick={() => onOpen('updateProfile', { userByUsername: user })}
+              onClick={() => onOpen('updateProfile')}
             >
               Chỉnh sửa trang cá nhân
             </Button>
