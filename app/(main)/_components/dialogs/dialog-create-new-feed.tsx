@@ -28,7 +28,6 @@ import { FileImage, Loader2, MapPin, Smile, X } from 'lucide-react';
 import { useCreatePost } from '@/features/post/api/use-create-post';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { useCreateNewFeed } from '@/hooks/useCreateNewFeed';
 import Image from 'next/image';
 import { EmojiPopover } from '../emoji-popover';
 import { useGenerateUpload } from '@/features/upload/api/use-generate-upload';
@@ -43,11 +42,11 @@ export function DialogCreateNewFeed({
 }: {
   children?: React.ReactNode;
 }) {
-  const currentUser = useQuery(api.user.getCurrentUser);
+  const currentUser = useQuery(api.users.getCurrentUser);
 
   const [isPending, setIsPending] = useState(false);
 
-  const { openDialog, onOpenChange } = useCreateNewFeed();
+  const [open, setOpen] = useState(false);
 
   const [file, setFile] = useState<File | null>(null);
 
@@ -61,6 +60,7 @@ export function DialogCreateNewFeed({
     },
     resolver: zodResolver(schemaCreateNewFeed),
   });
+
   const { mutate: generateUploadUrl } = useGenerateUpload();
   const onSubmit = async (data: z.infer<typeof schemaCreateNewFeed>) => {
     try {
@@ -93,14 +93,13 @@ export function DialogCreateNewFeed({
         storageId: fileStorageId,
       });
 
-      onOpenChange(false);
-      form.reset();
       toast.success('Đăng bài thành công');
     } catch (error) {
       console.log(error);
       toast.error('Đăng bài thất bại');
     } finally {
       setIsPending(false);
+      setOpen(false);
     }
   };
   const handleInputChange = (event: any) => {
@@ -116,17 +115,17 @@ export function DialogCreateNewFeed({
   };
 
   useEffect(() => {
-    if (!openDialog) {
+    if (!open) {
       form.reset();
       setFile(null);
       if (inputRef.current) {
         inputRef.current.value = '';
       }
     }
-  }, [form, openDialog]);
+  }, [form, open]);
 
   return (
-    <Dialog open={openDialog} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px] lg:max-w-[600px] max-h-[90vh]">
         <DialogHeader>

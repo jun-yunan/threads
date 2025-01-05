@@ -13,10 +13,10 @@ import { Button } from '@/components/ui/button';
 interface DashboardPageProps {}
 
 const DashboardPage: FunctionComponent<DashboardPageProps> = () => {
-  const currentUser = useQuery(api.user.getCurrentUser);
+  const currentUser = useQuery(api.users.getCurrentUser);
 
   return (
-    <Card className="lg:w-[40%] w-full mt-16">
+    <>
       <DialogCreateNewFeed>
         <div className="flex items-center justify-between gap-x-3 p-4">
           <Avatar>
@@ -35,7 +35,7 @@ const DashboardPage: FunctionComponent<DashboardPageProps> = () => {
       </DialogCreateNewFeed>
       <Separator />
       <Posts currentUser={currentUser} />
-    </Card>
+    </>
   );
 };
 

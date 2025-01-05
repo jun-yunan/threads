@@ -1,25 +1,16 @@
 'use client';
 
-import { FunctionComponent, useState } from 'react';
+import { FunctionComponent, useCallback, useState } from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  Bookmark,
-  ChevronDown,
-  Heart,
-  Newspaper,
-  Plus,
-  UserPlus,
-} from 'lucide-react';
-import { useCreateNewFeed } from '@/hooks/useCreateNewFeed';
+import { Bookmark, ChevronDown, Heart, Plus, UserPlus } from 'lucide-react';
 import { DialogCreateNewFeed } from './dialogs/dialog-create-new-feed';
 
 interface HeaderProps {}
@@ -29,11 +20,12 @@ type Options = 'Dành cho bạn' | 'Đang theo dõi' | 'Đã thích' | 'Đã Lư
 const Header: FunctionComponent<HeaderProps> = () => {
   const [selectedOption, setSelectedOption] = useState<Options>('Dành cho bạn');
 
-  const { onOpenChange } = useCreateNewFeed();
+  const handleSelect = useCallback((event: Event) => {
+    event.preventDefault();
+  }, []);
 
   return (
     <>
-      {/* <DialogCreateNewFeed /> */}
       <div className="fixed top-0 right-0 left-0 z-10 bg-neutral-900 w-full h-16 flex items-center justify-center">
         <DropdownMenu>
           <DropdownMenuTrigger>
@@ -78,7 +70,7 @@ const Header: FunctionComponent<HeaderProps> = () => {
             <DropdownMenuSeparator />
             <DialogCreateNewFeed>
               <DropdownMenuItem
-                // onClick={() => onOpenChange(true)}
+                onSelect={handleSelect}
                 className="py-3 text-base font-semibold rounded-lg cursor-pointer flex items-center justify-between"
               >
                 <p>Tạo bảng feed mới</p>
