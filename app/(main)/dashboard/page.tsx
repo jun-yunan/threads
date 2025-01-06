@@ -9,6 +9,7 @@ import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
 
 interface DashboardPageProps {}
 
@@ -23,8 +24,11 @@ const DashboardPage: FunctionComponent<DashboardPageProps> = () => {
             <AvatarImage
               src={currentUser?.imageUrl}
               alt={currentUser?.username}
+              className="object-cover"
             />
-            <AvatarFallback>{currentUser?.username}</AvatarFallback>
+            <AvatarFallback>
+              <Loader2 className="animate-spin" />
+            </AvatarFallback>
           </Avatar>
           <div className="w-full">
             <p>Có gì mới?</p>

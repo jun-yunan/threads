@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { api } from '@/convex/_generated/api';
 import { useQuery } from 'convex/react';
-import { Instagram, SquareKanban } from 'lucide-react';
+import { Instagram, Loader2, SquareKanban } from 'lucide-react';
 import { FunctionComponent, use, useMemo } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DialogCreateNewFeed } from '../_components/dialogs/dialog-create-new-feed';
@@ -56,7 +56,9 @@ const ProfilePage: FunctionComponent<ProfilePageProps> = (props) => {
                 </div>
                 <Avatar className="w-20 h-20">
                   <AvatarImage src={user.imageUrl!} className="object-cover" />
-                  <AvatarFallback>{user.username}</AvatarFallback>
+                  <AvatarFallback>
+                    <Loader2 className="animate-spin" />
+                  </AvatarFallback>
                 </Avatar>
               </div>
               <p className="text-sm text-ellipsis text-wrap break-words ">
@@ -113,8 +115,14 @@ const ProfilePage: FunctionComponent<ProfilePageProps> = (props) => {
               <DialogCreateNewFeed>
                 <div className="cursor-pointer flex items-center justify-between gap-x-3 p-4">
                   <Avatar>
-                    <AvatarImage src={user.imageUrl!} alt={user?.username} />
-                    <AvatarFallback>{user?.username}</AvatarFallback>
+                    <AvatarImage
+                      src={user.imageUrl!}
+                      className="object-cover"
+                      alt={user?.username}
+                    />
+                    <AvatarFallback>
+                      <Loader2 className="animate-spin" />
+                    </AvatarFallback>
                   </Avatar>
                   <div className="w-full">
                     <p>Có gì mới?</p>

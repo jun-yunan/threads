@@ -31,19 +31,28 @@ import { toast } from 'sonner';
 import Image from 'next/image';
 import { EmojiPopover } from '../emoji-popover';
 import { useGenerateUpload } from '@/features/upload/api/use-generate-upload';
-import { Id } from '@/convex/_generated/dataModel';
+import { Doc, Id } from '@/convex/_generated/dataModel';
+import { format } from 'date-fns';
+import Link from 'next/link';
+import { useCreateReplyPost } from '@/features/replies/api/use-create-reply-post';
+
+type Post = (typeof api.posts.getByUsername._returnType)['page'][0];
 
 const schemaCreateNewFeed = z.object({
   content: z.string().min(1).max(500),
+  tags: z.array(z.string()).optional(),
+  location: z.string().optional(),
 });
 
-export function DialogCreateNewFeed({
+export function DialogCommentPost({
   children,
+  post,
+  currentUser,
 }: {
   children?: React.ReactNode;
+  currentUser: Doc<'users'>;
+  post: Post;
 }) {
-  const currentUser = useQuery(api.users.getCurrentUser);
-
   const [isPending, setIsPending] = useState(false);
 
   const [open, setOpen] = useState(false);
@@ -52,17 +61,20 @@ export function DialogCreateNewFeed({
 
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  const { mutate: mutationCreatePost } = useCreatePost();
+  const { mutate: mutationCreateReplyPost } = useCreateReplyPost();
 
   const form = useForm<z.infer<typeof schemaCreateNewFeed>>({
     defaultValues: {
       content: '',
+      location: '',
+      tags: [],
     },
     resolver: zodResolver(schemaCreateNewFeed),
   });
 
   const { mutate: generateUploadUrl } = useGenerateUpload();
   const onSubmit = async (data: z.infer<typeof schemaCreateNewFeed>) => {
+    if (!currentUser || !post) return;
     try {
       setIsPending(true);
       let fileStorageId: Id<'_storage'> | undefined;
@@ -86,11 +98,13 @@ export function DialogCreateNewFeed({
         const { storageId } = await result.json();
         fileStorageId = storageId;
       }
-      mutationCreatePost({
+      mutationCreateReplyPost({
         content: data.content,
-        published: true,
-        formatFile: file?.type,
-        storageId: fileStorageId,
+        authorId: currentUser._id,
+        postId: post._id,
+        tags: data.tags,
+        location: data.location,
+        image: fileStorageId,
       });
 
       toast.success('Đăng bài thành công');
@@ -129,13 +143,48 @@ export function DialogCreateNewFeed({
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px] lg:max-w-[600px] max-h-[90vh]">
         <DialogHeader>
-          <DialogTitle>New Feed</DialogTitle>
+          <DialogTitle>Trả lời bảng tin</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="w-full flex flex-col gap-y-4"
+          >
+            {post && post.author && (
+              <div className="w-full flex items-center gap-x-2">
+                <Avatar className="self-start">
+                  <AvatarImage
+                    className="object-cover"
+                    src={post.author.imageUrl}
+                    alt={post.author.name}
+                  />
+                  <AvatarFallback>
+                    <Loader2 className="animate-spin" />
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col items-start justify-between">
+                  <div className="flex items-center gap-x-3">
+                    <Link
+                      href={`/${post.author.username}`}
+                      className="lg:text-base text-sm font-semibold"
+                    >
+                      {post.author.username}
+                    </Link>
+                    <p className="tex-sm text-muted-foreground">
+                      {format(new Date(), 'dd/MM/yyyy HH:mm')}
+                    </p>
+                  </div>
+                  <p className="text-base text-wrap break-words whitespace-pre-wrap break-all">
+                    {post.content}
+                  </p>
+                </div>
+              </div>
+            )}
+
             <div className="flex items-center gap-x-2 w-full ">
               <Avatar className="self-start">
                 <AvatarImage
+                  className="object-cover"
                   src={currentUser?.imageUrl}
                   alt={currentUser?.name}
                 />
@@ -155,12 +204,12 @@ export function DialogCreateNewFeed({
                       <FormControl>
                         <TextareaAutoSize
                           rows={1}
-                          maxRows={6}
+                          maxRows={4}
                           maxLength={500}
                           {...field}
                           onChange={handleInputChange}
                           onClick={handleInputChange}
-                          placeholder="Có gì mới?"
+                          placeholder="Trả lời bài viết này..."
                           className="min-h-full w-full resize-none border-0 outline-0 bg-card text-card-foreground placeholder:text-muted-foreground py-1.5"
                         />
                       </FormControl>
@@ -172,12 +221,12 @@ export function DialogCreateNewFeed({
                   )}
                 />
                 {file && (
-                  <div className="relative w-full h-[250px]">
+                  <div className="relative w-[80%] h-[200px]">
                     <Image
                       src={URL.createObjectURL(file)}
                       alt="image"
                       width={300}
-                      height={300}
+                      height={200}
                       className="w-full h-full rounded-lg object-cover"
                     />
                     <Button

@@ -18,6 +18,7 @@ import {
   ChevronRight,
   Trash,
   Ban,
+  Loader2,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Separator } from '@/components/ui/separator';
@@ -38,6 +39,8 @@ import { DialogCardProfile } from './dialogs/dialog-card-profile';
 import { HoverCardProfile } from './hover-card-profile';
 import { DialogReviewImage } from './dialogs/dialog-review-image';
 import { api } from '@/convex/_generated/api';
+import ToggleLikePost from './toggle-like-post';
+import HandleCommentPost from './handle-comment-post';
 
 type Post = (typeof api.posts.getByUsername._returnType)['page'][0];
 
@@ -66,10 +69,13 @@ const RendererPosts: FunctionComponent<RendererPostsProps> = ({
                   <HoverCardProfile information={post.author}>
                     <Avatar className="cursor-pointer hover:opacity-70 duration-300 transition-all">
                       <AvatarImage
+                        className="object-cover"
                         src={post.author.imageUrl}
                         alt={post.author.username}
                       />
-                      <AvatarFallback>{post.author.username}</AvatarFallback>
+                      <AvatarFallback>
+                        <Loader2 className="animate-spin" />
+                      </AvatarFallback>
                     </Avatar>
                   </HoverCardProfile>
                 )}
@@ -80,7 +86,9 @@ const RendererPosts: FunctionComponent<RendererPostsProps> = ({
                         src={post.author.imageUrl}
                         alt={post.author.username}
                       />
-                      <AvatarFallback>{post.author.username}</AvatarFallback>
+                      <AvatarFallback>
+                        <Loader2 className="animate-spin" />
+                      </AvatarFallback>
                     </Avatar>
                   </DialogCardProfile>
                 )}
@@ -172,9 +180,12 @@ const RendererPosts: FunctionComponent<RendererPostsProps> = ({
               </DropdownMenu>
             </div>
             <div className="w-full flex flex-col items-start gap-y-2">
-              <p className="pl-12 text-base text-wrap break-words whitespace-pre-wrap break-all">
+              <Link
+                href={`/${post?.author.username}/post/${post?._id}`}
+                className="pl-12 text-base text-wrap break-words whitespace-pre-wrap break-all"
+              >
                 {post?.content}
-              </p>
+              </Link>
               {post?.file && (
                 <DialogReviewImage imageUrl={post.file}>
                   <div
@@ -192,14 +203,15 @@ const RendererPosts: FunctionComponent<RendererPostsProps> = ({
                 </DialogReviewImage>
               )}
               <div className="ml-8 flex items-center gap-x-4">
-                <Button className="rounded-full" variant="ghost">
-                  <Heart />
-                  <p>0</p>
-                </Button>
-                <Button className="rounded-full" variant="ghost">
-                  <MessageCircle />
-                  <p>0</p>
-                </Button>
+                {post && currentUser && (
+                  <ToggleLikePost
+                    postId={post?._id}
+                    userId={currentUser?._id}
+                  />
+                )}
+                {post && currentUser && (
+                  <HandleCommentPost post={post} currentUser={currentUser} />
+                )}
                 <Button className="rounded-full" variant="ghost">
                   <Repeat />
                   <p>0</p>

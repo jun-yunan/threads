@@ -96,9 +96,18 @@ export const get = query({
             ? await ctx.storage.getUrl(post.storageId)
             : undefined;
 
+          const generateImageUrl = author.imageStorageId
+            ? await ctx.storage.getUrl(author.imageStorageId)
+            : author.imageUrl;
+
+          const authorIncludeImageUrl = {
+            ...author,
+            imageUrl: generateImageUrl!,
+          };
+
           return {
             ...post,
-            author,
+            author: authorIncludeImageUrl,
             file,
           };
         }),
@@ -151,14 +160,57 @@ export const getByUsername = query({
             ? await ctx.storage.getUrl(post.storageId)
             : undefined;
 
+          const generateImageUrl = author.imageStorageId
+            ? await ctx.storage.getUrl(author.imageStorageId)
+            : author.imageUrl;
+
+          const authorIncludeImageUrl = {
+            ...author,
+            imageUrl: generateImageUrl!,
+          };
+
           return {
             ...post,
-            author,
+            author: authorIncludeImageUrl,
             file,
           };
         }),
       ),
     };
+  },
+});
+
+export const getById = query({
+  args: {
+    postId: v.id('posts'),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+
+    if (!identity) {
+      throw new ConvexError('Unauthorized');
+    }
+
+    const currentUser = await ctx.db
+      .query('users')
+      .withIndex('by_clerkId', (q) => q.eq('clerkId', identity.subject))
+      .unique();
+
+    if (!currentUser) {
+      throw new ConvexError('User not found');
+    }
+
+    const post = await ctx.db.get(args.postId);
+
+    if (!post) {
+      throw new ConvexError('Post not found');
+    }
+
+    const generateImage = post.storageId
+      ? await ctx.storage.getUrl(post.storageId)
+      : undefined;
+
+    return { ...post, file: generateImage, author: currentUser };
   },
 });
 

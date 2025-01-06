@@ -173,7 +173,9 @@ export function DialogUpdateProfile({
                         className="object-cover"
                       />
                     )}
-                    <AvatarFallback>{currentUser?.username}</AvatarFallback>
+                    <AvatarFallback>
+                      <Loader2 className="animate-spin" />
+                    </AvatarFallback>
                   </Avatar>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-52">

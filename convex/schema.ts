@@ -30,6 +30,7 @@ export default defineSchema({
     location: v.optional(v.string()),
     tags: v.optional(v.array(v.string())),
     published: v.boolean(),
+    originalThreadId: v.optional(v.id('posts')),
     updatedAt: v.number(),
   })
     .index('by_author', ['author'])
@@ -45,6 +46,17 @@ export default defineSchema({
     .index('by_user_id', ['userId'])
     .index('by_post_id', ['postId'])
     .index('by_post_id_user_id', ['postId', 'userId']),
+
+  replies: defineTable({
+    authorId: v.id('users'),
+    postId: v.id('posts'),
+    content: v.string(),
+    image: v.optional(v.id('_storage')),
+    location: v.optional(v.string()),
+    tags: v.optional(v.array(v.string())),
+    parentReplyId: v.optional(v.id('replies')),
+    updatedAt: v.optional(v.number()),
+  }),
 
   followers: defineTable({
     follower: v.id('users'), // ID của người theo dõi
@@ -65,10 +77,10 @@ export default defineSchema({
     .index('by_author', ['author']),
 
   likes: defineTable({
-    post: v.id('posts'),
-    user: v.id('users'),
-    updatedAt: v.optional(v.number()),
+    postId: v.id('posts'),
+    userId: v.id('users'),
   })
-    .index('by_post', ['post'])
-    .index('by_user', ['user']),
+    .index('by_post_id', ['postId'])
+    .index('by_user_id', ['userId'])
+    .index('by_post_id_user_id', ['postId', 'userId']),
 });

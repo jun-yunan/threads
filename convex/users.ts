@@ -50,11 +50,13 @@ export const getCurrentUser = query({
       throw new ConvexError('User not found');
     }
 
-    // const generateImageUrl = user.imageStorageId
-    //   ? await context.storage.getUrl(user.imageStorageId)
-    //   : user.imageUrl;
+    const generateImageUrl = user.imageStorageId
+      ? await context.storage.getUrl(user.imageStorageId)
+      : user.imageUrl;
 
-    return user;
+    return { ...user, imageUrl: generateImageUrl! };
+
+    // return user;
   },
 });
 
@@ -88,7 +90,7 @@ export const getUserByUsername = query({
       ? await context.storage.getUrl(user.imageStorageId)
       : user.imageUrl;
 
-    return { ...user, imageUrl: generateImageUrl };
+    return { ...user, imageUrl: generateImageUrl! };
 
     // return user;
   },

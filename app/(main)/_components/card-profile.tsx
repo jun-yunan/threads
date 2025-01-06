@@ -3,7 +3,7 @@ import { FunctionComponent } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
-import { CalendarDays, UserPlus } from 'lucide-react';
+import { CalendarDays, Loader2, UserPlus } from 'lucide-react';
 import Link from 'next/link';
 
 interface CardProfileProps {
@@ -16,7 +16,9 @@ const CardProfile: FunctionComponent<CardProfileProps> = ({ information }) => {
       <div className="flex gap-x-4">
         <Avatar>
           <AvatarImage src={information.imageUrl} />
-          <AvatarFallback>{information.username}</AvatarFallback>
+          <AvatarFallback>
+            <Loader2 className="animate-spin" />
+          </AvatarFallback>
         </Avatar>
         <div className="flex flex-col items-start gap-y-1">
           <Link
