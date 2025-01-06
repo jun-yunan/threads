@@ -37,7 +37,7 @@ const handlerClerkWebhook = httpAction(async (context, req) => {
 
   switch (event.type) {
     case 'user.created': {
-      const user = await context.runQuery(internal.user.get, {
+      const user = await context.runQuery(internal.users.get, {
         clerkId: event.data.id,
       });
       if (user) {
@@ -59,7 +59,7 @@ const handlerClerkWebhook = httpAction(async (context, req) => {
         }) +
         `${uuidv4().split('-')[0]}`;
 
-      await context.runMutation(internal.user.create, {
+      await context.runMutation(internal.users.create, {
         name: fullName,
         username: username,
         imageUrl: event.data.image_url,

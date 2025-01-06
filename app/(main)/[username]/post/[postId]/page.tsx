@@ -1,5 +1,6 @@
 'use client';
 
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
 import { useQuery } from 'convex/react';
@@ -36,7 +37,13 @@ const PostDetailPage: FunctionComponent<PostDetailPageProps> = (props) => {
     [currentUser, userByUsername, isCurrentUser],
   );
   return (
-    <div>
+    <div className="w-full flex flex-col">
+      <div>
+        <Avatar>
+          <AvatarImage />
+          <AvatarFallback></AvatarFallback>
+        </Avatar>
+      </div>
       <p>{username}</p>
       <p>{postId}</p>
     </div>
