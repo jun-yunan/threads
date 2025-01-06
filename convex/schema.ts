@@ -31,13 +31,14 @@ export default defineSchema({
     tags: v.optional(v.array(v.string())),
     published: v.boolean(),
     originalThreadId: v.optional(v.id('posts')),
+    isReply: v.optional(v.boolean()),
     updatedAt: v.number(),
   })
     .index('by_author', ['author'])
     .index('by_published', ['published'])
     .index('by_tags', ['tags'])
-    .index('by_comments', ['comments']),
-
+    .index('by_comments', ['comments'])
+    .index('by_is_reply', ['isReply']),
   reposts: defineTable({
     postId: v.id('posts'),
     userId: v.id('users'),
@@ -56,7 +57,10 @@ export default defineSchema({
     tags: v.optional(v.array(v.string())),
     parentReplyId: v.optional(v.id('replies')),
     updatedAt: v.optional(v.number()),
-  }),
+  })
+    .index('by_post_id', ['postId'])
+    .index('by_parent_reply_id', ['parentReplyId'])
+    .index('by_author_id', ['authorId']),
 
   followers: defineTable({
     follower: v.id('users'), // ID của người theo dõi
@@ -68,13 +72,15 @@ export default defineSchema({
 
   comments: defineTable({
     content: v.string(),
-    author: v.id('users'),
-    post: v.id('posts'),
     likes: v.array(v.id('users')),
+    reply: v.optional(v.id('comments')),
+    image: v.optional(v.id('_storage')),
+    userId: v.id('users'),
+    postId: v.id('posts'),
     updatedAt: v.optional(v.number()),
   })
-    .index('by_post', ['post'])
-    .index('by_author', ['author']),
+    .index('by_post_id', ['postId'])
+    .index('by_user_id', ['userId']),
 
   likes: defineTable({
     postId: v.id('posts'),

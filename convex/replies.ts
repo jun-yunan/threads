@@ -1,5 +1,5 @@
 import { ConvexError, v } from 'convex/values';
-import { mutation } from './_generated/server';
+import { mutation, query } from './_generated/server';
 
 export const create = mutation({
   args: {
@@ -43,5 +43,43 @@ export const create = mutation({
     }
 
     return reply;
+  },
+});
+
+export const getReplyByPostId = query({
+  args: {
+    postId: v.id('posts'),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+
+    if (!identity) {
+      throw new ConvexError('Unauthorized');
+    }
+
+    const replies = await ctx.db
+      .query('replies')
+      .withIndex('by_post_id', (q) => q.eq('postId', args.postId))
+      .collect();
+
+    const result = await Promise.all(
+      replies.map(async (reply) => {
+        const author = await ctx.db.get(reply.authorId);
+
+        const image = reply.image
+          ? await ctx.storage.getUrl(reply.image)
+          : undefined;
+
+        const authorImage = author?.imageStorageId
+          ? await ctx.storage.getUrl(author.imageStorageId)
+          : author?.imageUrl;
+
+        const authorIncludeImageUrl = { ...author, imageUrl: authorImage! };
+
+        return { ...reply, author: authorIncludeImageUrl, image };
+      }),
+    );
+
+    return result;
   },
 });

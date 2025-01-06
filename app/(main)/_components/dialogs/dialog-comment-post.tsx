@@ -107,10 +107,10 @@ export function DialogCommentPost({
         image: fileStorageId,
       });
 
-      toast.success('Đăng bài thành công');
+      toast.success('Trả lời bài đăng thành công.');
     } catch (error) {
       console.log(error);
-      toast.error('Đăng bài thất bại');
+      toast.error('Có lỗi xảy ra khi trả lời bài đăng.');
     } finally {
       setIsPending(false);
       setOpen(false);

@@ -2,6 +2,7 @@ import { ConvexError, v } from 'convex/values';
 import { mutation, query } from './_generated/server';
 import { paginationOptsValidator } from 'convex/server';
 import { userAgent } from 'next/server';
+import { auth } from '@clerk/nextjs/server';
 
 export const create = mutation({
   args: {
@@ -182,6 +183,7 @@ export const getByUsername = query({
 
 export const getById = query({
   args: {
+    username: v.string(),
     postId: v.id('posts'),
   },
   handler: async (ctx, args) => {
@@ -191,12 +193,12 @@ export const getById = query({
       throw new ConvexError('Unauthorized');
     }
 
-    const currentUser = await ctx.db
+    const user = await ctx.db
       .query('users')
-      .withIndex('by_clerkId', (q) => q.eq('clerkId', identity.subject))
+      .withIndex('by_username', (q) => q.eq('username', args.username))
       .unique();
 
-    if (!currentUser) {
+    if (!user) {
       throw new ConvexError('User not found');
     }
 
@@ -210,7 +212,16 @@ export const getById = query({
       ? await ctx.storage.getUrl(post.storageId)
       : undefined;
 
-    return { ...post, file: generateImage, author: currentUser };
+    const generateUserImageUrl = user.imageStorageId
+      ? await ctx.storage.getUrl(user.imageStorageId)
+      : user.imageUrl;
+
+    const authorIncludeImageUrl = {
+      ...user,
+      imageUrl: generateUserImageUrl!,
+    };
+
+    return { ...post, file: generateImage, author: authorIncludeImageUrl };
   },
 });
 
