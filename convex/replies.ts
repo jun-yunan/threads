@@ -1,5 +1,6 @@
 import { ConvexError, v } from 'convex/values';
 import { mutation, query } from './_generated/server';
+import { Doc } from './_generated/dataModel';
 
 export const create = mutation({
   args: {
@@ -74,7 +75,10 @@ export const getReplyByPostId = query({
           ? await ctx.storage.getUrl(author.imageStorageId)
           : author?.imageUrl;
 
-        const authorIncludeImageUrl = { ...author, imageUrl: authorImage! };
+        const authorIncludeImageUrl = {
+          ...author,
+          imageUrl: authorImage!,
+        } as Doc<'users'>;
 
         return { ...reply, author: authorIncludeImageUrl, image };
       }),

@@ -38,18 +38,17 @@ import { useModalStore } from '@/hooks/use-modal-store';
 import { DialogCardProfile } from './dialogs/dialog-card-profile';
 import { HoverCardProfile } from './hover-card-profile';
 import { DialogReviewImage } from './dialogs/dialog-review-image';
-import { api } from '@/convex/_generated/api';
 import ToggleLikePost from './toggle-like-post';
 import RepliesPost from './replies-post';
-type Post = (typeof api.posts.getByUsername._returnType)['page'][0];
+import { api } from '@/convex/_generated/api';
 
-interface RendererPostProps {
+interface RendererRepliesPostProps {
+  reply: (typeof api.replies.getReplyByPostId._returnType)[0];
   currentUser: Doc<'users'> | undefined;
-  post: Post;
 }
 
-const RendererPost: FunctionComponent<RendererPostProps> = ({
-  post,
+const RendererRepliesPost: FunctionComponent<RendererRepliesPostProps> = ({
+  reply,
   currentUser,
 }) => {
   const isMobile = useIsMobile();
@@ -57,18 +56,17 @@ const RendererPost: FunctionComponent<RendererPostProps> = ({
   const router = useRouter();
 
   const { onOpen } = useModalStore();
-
   return (
-    <div key={post?._id} className="w-full flex flex-col gap-y-2">
+    <div className="w-full flex flex-col gap-y-2">
       <div className="w-full flex justify-between">
         <div className="flex items-center gap-x-2">
-          {post && !isMobile && (
-            <HoverCardProfile information={post.author}>
+          {reply && !isMobile && (
+            <HoverCardProfile information={reply.author}>
               <Avatar className="cursor-pointer hover:opacity-70 duration-300 transition-all">
                 <AvatarImage
                   className="object-cover"
-                  src={post.author.imageUrl}
-                  alt={post.author.username}
+                  src={reply.author.imageUrl}
+                  alt={reply.author.username}
                 />
                 <AvatarFallback>
                   <Loader2 className="animate-spin" />
@@ -76,12 +74,12 @@ const RendererPost: FunctionComponent<RendererPostProps> = ({
               </Avatar>
             </HoverCardProfile>
           )}
-          {post && isMobile && (
-            <DialogCardProfile information={post.author}>
+          {reply && isMobile && (
+            <DialogCardProfile information={reply.author}>
               <Avatar className="cursor-pointer hover:opacity-70 duration-300 transition-all">
                 <AvatarImage
-                  src={post.author.imageUrl}
-                  alt={post.author.username}
+                  src={reply.author.imageUrl}
+                  alt={reply.author.username}
                 />
                 <AvatarFallback>
                   <Loader2 className="animate-spin" />
@@ -91,14 +89,14 @@ const RendererPost: FunctionComponent<RendererPostProps> = ({
           )}
           <div className="flex flex-col justify-between items-start">
             <Link
-              href={`/${post?.author.username}`}
+              href={`/${reply?.author.username}`}
               className="text-sm font-semibold hover:underline"
             >
-              {post?.author.username}
+              {reply?.author.username}
             </Link>
             <p className="text-muted-foreground text-sm">
-              {post?._creationTime &&
-                format(new Date(post._creationTime), 'dd/MM/yyyy HH:mm')}
+              {reply?._creationTime &&
+                format(new Date(reply._creationTime), 'dd/MM/yyyy HH:mm')}
             </p>
           </div>
         </div>
@@ -112,7 +110,7 @@ const RendererPost: FunctionComponent<RendererPostProps> = ({
               <MoreHorizontal />
             </Button>
           </DropdownMenuTrigger>
-          {currentUser?._id === post?.author._id ? (
+          {currentUser?._id === reply?.author._id ? (
             <DropdownMenuContent>
               <DropdownMenuItem>
                 <Bookmark />
@@ -128,9 +126,9 @@ const RendererPost: FunctionComponent<RendererPostProps> = ({
                 <ChevronRight />
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              {post && (
+              {reply && (
                 <DropdownMenuItem
-                  onClick={() => onOpen('deletePost', { postId: post._id })}
+                //   onClick={() => onOpen('deletePost', { postId: reply._id })}
                 >
                   <Trash />
                   <p>Xóa</p>
@@ -176,16 +174,16 @@ const RendererPost: FunctionComponent<RendererPostProps> = ({
       </div>
       <div className="w-full flex flex-col items-start gap-y-2">
         <Link
-          href={`/${post?.author.username}/post/${post?._id}`}
+          href={`/${reply?.author.username}/post/${reply?._id}`}
           className="pl-12 text-base text-wrap break-words whitespace-pre-wrap break-all"
         >
-          {post?.content}
+          {reply?.content}
         </Link>
-        {post?.file && (
-          <DialogReviewImage imageUrl={post.file}>
+        {reply?.image && (
+          <DialogReviewImage imageUrl={reply.image}>
             <div className="pl-12 w-full max-h-[500px] relative overflow-hidden cursor-pointer hover:opacity-75 duration-500 ease-in-out transition-all">
               <Image
-                src={post?.file}
+                src={reply?.image}
                 alt=""
                 width={500}
                 height={500}
@@ -195,12 +193,12 @@ const RendererPost: FunctionComponent<RendererPostProps> = ({
           </DialogReviewImage>
         )}
         <div className="ml-8 flex items-center gap-x-4">
-          {post && currentUser && (
-            <ToggleLikePost postId={post?._id} userId={currentUser?._id} />
+          {/* {reply && currentUser && (
+            <ToggleLikePost postId={reply?._id} userId={currentUser?._id} />
           )}
-          {post && currentUser && (
-            <RepliesPost post={post} currentUser={currentUser} />
-          )}
+          {reply && currentUser && (
+            <RepliesPost post={reply} currentUser={currentUser} />
+          )} */}
           <Button className="rounded-full" variant="ghost">
             <Repeat />
             <p>0</p>
@@ -215,4 +213,4 @@ const RendererPost: FunctionComponent<RendererPostProps> = ({
   );
 };
 
-export default RendererPost;
+export default RendererRepliesPost;

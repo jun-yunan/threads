@@ -11,9 +11,6 @@ export default defineSchema({
     email: v.string(),
     bio: v.optional(v.string()),
     link: v.optional(v.string()),
-    posts: v.optional(v.array(v.id('posts'))),
-    followers: v.optional(v.array(v.id('users'))),
-    following: v.optional(v.array(v.id('users'))),
     updatedAt: v.optional(v.number()),
   })
     .index('by_email', ['email'])
@@ -63,30 +60,22 @@ export default defineSchema({
     .index('by_author_id', ['authorId']),
 
   followers: defineTable({
-    follower: v.id('users'), // ID của người theo dõi
-    following: v.id('users'), // ID của người được theo dõi
+    follower: v.id('users'),
+    following: v.id('users'),
     updatedAt: v.optional(v.number()),
   })
-    .index('by_follower', ['follower']) // Index theo người theo dõi
-    .index('by_following', ['following']), // Index theo người được theo dõi
-
-  comments: defineTable({
-    content: v.string(),
-    likes: v.array(v.id('users')),
-    reply: v.optional(v.id('comments')),
-    image: v.optional(v.id('_storage')),
-    userId: v.id('users'),
-    postId: v.id('posts'),
-    updatedAt: v.optional(v.number()),
-  })
-    .index('by_post_id', ['postId'])
-    .index('by_user_id', ['userId']),
+    .index('by_follower', ['follower'])
+    .index('by_following', ['following']),
 
   likes: defineTable({
     postId: v.id('posts'),
     userId: v.id('users'),
+    replyId: v.optional(v.boolean()),
+    isReply: v.optional(v.boolean()),
+    updatedAt: v.optional(v.number()),
   })
     .index('by_post_id', ['postId'])
     .index('by_user_id', ['userId'])
-    .index('by_post_id_user_id', ['postId', 'userId']),
+    .index('by_post_id_user_id', ['postId', 'userId'])
+    .index('by_reply_id_user_id', ['replyId', 'userId']),
 });

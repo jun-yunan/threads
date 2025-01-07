@@ -10,8 +10,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Bookmark, ChevronDown, Heart, Plus, UserPlus } from 'lucide-react';
+import {
+  Bookmark,
+  ChevronDown,
+  Heart,
+  Menu,
+  Plus,
+  UserPlus,
+} from 'lucide-react';
 import { DialogCreateNewFeed } from './dialogs/dialog-create-new-feed';
+import { useTheme } from 'next-themes';
+import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 interface HeaderProps {}
 
@@ -24,63 +36,83 @@ const Header: FunctionComponent<HeaderProps> = () => {
     event.preventDefault();
   }, []);
 
+  const { theme } = useTheme();
+
+  const isMobile = useIsMobile();
+
   return (
     <>
-      <div className="fixed top-0 right-0 left-0 z-10 bg-neutral-900 w-full h-16 flex items-center justify-center">
+      <div
+        className={cn(
+          'fixed top-0 right-0 left-0 z-10 w-full h-16 flex items-center justify-center',
+          theme === 'dark' ? 'bg-black/90' : 'bg-white',
+          isMobile && 'flex items-center justify-between px-2',
+        )}
+      >
+        {isMobile && (
+          <Link href="/dashboard" className="text-base font-bold animate-pulse">
+            <p>NAKIET</p>
+          </Link>
+        )}
         <DropdownMenu>
           <DropdownMenuTrigger>
-            <div className="flex items-center gap-x-2 text-lg font-semibold">
+            <div className="flex items-center gap-x-2 text-base lg:text-lg font-semibold">
               <p>{selectedOption}</p>
-              <ChevronDown />
+              <ChevronDown className="w-4 h-4 lg:w-6 lg:h-6" />
             </div>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-64 p-3">
+          <DropdownMenuContent className="lg:w-64 w-52 p-3">
             <DropdownMenuRadioGroup
               value={selectedOption}
               onValueChange={setSelectedOption as (value: string) => void}
             >
               <DropdownMenuRadioItem
-                className="py-3 text-base font-semibold rounded-lg cursor-pointer"
+                className="py-3 text-sm lg:text-base font-semibold rounded-lg cursor-pointer"
                 value="Dành cho bạn"
               >
                 <p>Dành cho bạn</p>
               </DropdownMenuRadioItem>
               <DropdownMenuRadioItem
-                className="py-3 text-base font-semibold rounded-lg cursor-pointer flex items-center justify-between"
+                className="py-3 text-sm lg:text-base font-semibold rounded-lg cursor-pointer flex items-center justify-between"
                 value="Đang theo dõi"
               >
                 <p>Đang theo dõi</p>
-                <UserPlus />
+                <UserPlus className="w-4 h-4 lg:w-6 lg:h-6" />
               </DropdownMenuRadioItem>
               <DropdownMenuRadioItem
-                className="py-3 text-base font-semibold rounded-lg cursor-pointer flex items-center justify-between"
+                className="py-3 text-sm lg:text-base font-semibold rounded-lg cursor-pointer flex items-center justify-between"
                 value="Đã thích"
               >
                 <p>Đã thích</p>
-                <Heart />
+                <Heart className="w-4 h-4 lg:w-6 lg:h-6" />
               </DropdownMenuRadioItem>
               <DropdownMenuRadioItem
-                className="py-3 text-base font-semibold rounded-lg cursor-pointer flex items-center justify-between"
+                className="py-3 text-sm lg:text-base font-semibold rounded-lg cursor-pointer flex items-center justify-between"
                 value="Đã lưu"
               >
                 <p>Đã lưu</p>
-                <Bookmark />
+                <Bookmark className="w-4 h-4 lg:w-6 lg:h-6" />
               </DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
             <DropdownMenuSeparator />
             <DialogCreateNewFeed>
               <DropdownMenuItem
                 onSelect={handleSelect}
-                className="py-3 text-base font-semibold rounded-lg cursor-pointer flex items-center justify-between"
+                className="py-3 text-sm lg:text-base font-semibold rounded-lg cursor-pointer flex items-center justify-between"
               >
                 <p>Tạo bảng feed mới</p>
                 <div>
-                  <Plus className="w-6 h-6" />
+                  <Plus className="lg:w-6 lg:h-6" />
                 </div>
               </DropdownMenuItem>
             </DialogCreateNewFeed>
           </DropdownMenuContent>
         </DropdownMenu>
+        {isMobile && (
+          <Button className="" variant="ghost" size="icon">
+            <Menu />
+          </Button>
+        )}
       </div>
     </>
   );

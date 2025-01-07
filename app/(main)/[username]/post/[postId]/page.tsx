@@ -1,6 +1,7 @@
 'use client';
 
 import RendererPost from '@/app/(main)/_components/renderer-post';
+import RendererRepliesPost from '@/app/(main)/_components/renderer-replies-post';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -56,7 +57,14 @@ const PostDetailPage: FunctionComponent<PostDetailPageProps> = (props) => {
       </div>
       <Separator />
       <div className="w-full h-full p-4">
-        {replies && replies.map((reply) => <div key={reply._id}></div>)}
+        {replies &&
+          replies.map((reply) => (
+            <RendererRepliesPost
+              currentUser={currentUser}
+              reply={reply}
+              key={reply._id}
+            />
+          ))}
       </div>
     </div>
   );

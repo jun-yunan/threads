@@ -44,7 +44,7 @@ const schemaCreateNewFeed = z.object({
   location: z.string().optional(),
 });
 
-export function DialogCommentPost({
+export function DialogRepliesPost({
   children,
   post,
   currentUser,

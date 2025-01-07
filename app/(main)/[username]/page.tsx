@@ -12,6 +12,8 @@ import PostsByUsername from './_components/posts-by-username';
 import { Separator } from '@/components/ui/separator';
 import { useModalStore } from '@/hooks/use-modal-store';
 import { DialogUpdateProfile } from '../_components/dialogs/dialog-update-profile';
+import { useGetCurrentUser } from '@/features/users/api/use-get-current-user';
+import { useGetUserByUsername } from '@/features/users/api/use-get-user-by-username';
 
 type Params = Promise<{ username: string }>;
 
@@ -24,9 +26,11 @@ const ProfilePage: FunctionComponent<ProfilePageProps> = (props) => {
 
   const username = useMemo(() => decodeURIComponent(params.username), [params]);
 
-  const currentUser = useQuery(api.users.getCurrentUser);
+  const { data: currentUser, isLoading: isLoadingDataCurrentUser } =
+    useGetCurrentUser();
 
-  const userByUsername = useQuery(api.users.getUserByUsername, { username });
+  const { data: userByUsername, isLoading: isLoadingDataUserByUsername } =
+    useGetUserByUsername(username);
 
   const isCurrentUser = useMemo(
     () => currentUser?.username === userByUsername?.username,
@@ -47,7 +51,9 @@ const ProfilePage: FunctionComponent<ProfilePageProps> = (props) => {
       {isCurrentUser && <DialogUpdateProfile currentUser={currentUser} />}
       <div className="w-full h-full flex flex-col">
         <div className="w-full flex-col flex gap-y-6 p-6">
-          {user && (
+          {!user || isLoadingDataCurrentUser || isLoadingDataUserByUsername ? (
+            <Loader2 className="animate-spin" />
+          ) : (
             <div className="w-full flex flex-col gap-y-2">
               <div className="w-full flex items-center justify-between">
                 <div className="flex flex-col items-start justify-around">

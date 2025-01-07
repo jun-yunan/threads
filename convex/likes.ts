@@ -1,7 +1,7 @@
 import { ConvexError, v } from 'convex/values';
 import { mutation, query } from './_generated/server';
 
-export const toggle = mutation({
+export const toggleLikePost = mutation({
   args: {
     postId: v.id('posts'),
     userId: v.id('users'),
@@ -108,5 +108,49 @@ export const getIsLikedPost = query({
       .unique();
 
     return !!liked;
+  },
+});
+
+export const toggleLikeReplies = mutation({
+  args: {
+    replyId: v.id('posts'),
+    userId: v.id('users'),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+
+    if (!identity) {
+      throw new ConvexError('Unauthorized');
+    }
+
+    const { replyId, userId } = args;
+
+    const user = await ctx.db.get(userId);
+
+    if (!user) {
+      throw new ConvexError('User not found');
+    }
+
+    const reply = await ctx.db.get(replyId);
+
+    if (!reply) {
+      throw new ConvexError('Post not found');
+    }
+
+    // const like = await ctx.db
+    //   .query('likes')
+    //   .withIndex('by_reply_id_user_id', (q) =>
+    //     q.eq('replyId', reply._id).eq('userId', userId),
+    //   )
+    //   .unique();
+
+    // if (like) {
+    //   await ctx.db.delete(like._id);
+    // } else {
+    //   await ctx.db.insert('likes', {
+    //     postId,
+    //     userId,
+    //   });
+    // }
   },
 });

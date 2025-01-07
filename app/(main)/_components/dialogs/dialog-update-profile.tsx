@@ -28,7 +28,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Doc, Id } from '@/convex/_generated/dataModel';
 import { useGenerateUpload } from '@/features/upload/api/use-generate-upload';
-import { useUpdateUser } from '@/features/user/api/use-update-user';
+import { useUpdateUser } from '@/features/users/api/use-update-user';
 import { toast } from 'sonner';
 
 export function DialogUpdateProfile({

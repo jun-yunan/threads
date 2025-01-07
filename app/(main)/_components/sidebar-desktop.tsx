@@ -8,7 +8,6 @@ import { SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { DialogCreateNewFeed } from './dialogs/dialog-create-new-feed';
-import { useGetCurrentUser } from '@/features/user/api/use-get-current-user';
 import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 
@@ -46,7 +45,7 @@ const SidebarDesktop: FunctionComponent<SidebarDesktopProps> = () => {
   const pathname = usePathname();
   const currentUser = useQuery(api.users.getCurrentUser);
   return (
-    <div className="fixed hidden top-0 bottom-0 z-20 left-0 md:flex flex-col items-center justify-between h-full px-3 py-4 bg-neutral-800 text-white">
+    <div className="fixed hidden top-0 bottom-0 z-20 left-0 md:flex flex-col items-center justify-between h-full px-2 py-4">
       <Link href="/dashboard" className="text-lg font-bold animate-pulse">
         <p>NAKIET</p>
       </Link>
@@ -58,8 +57,9 @@ const SidebarDesktop: FunctionComponent<SidebarDesktopProps> = () => {
                 href={`/${currentUser?.username}`}
                 key={index}
                 className={cn(
-                  'flex items-center gap-x-2 text-base font-semibold hover:bg-neutral-600 py-3 px-3 rounded-lg transition-all duration-500 ease-in-out',
-                  pathname === `/${currentUser?.username}` && 'bg-neutral-600',
+                  'flex items-center gap-x-2 text-base font-semibold hover:bg-neutral-200 dark:hover:bg-neutral-600 py-3 px-3 rounded-lg transition-all duration-500 ease-in-out',
+                  pathname === `/${currentUser?.username}` &&
+                    'dark:bg-neutral-600 bg-neutral-200',
                 )}
               >
                 {item.icon}
@@ -72,7 +72,7 @@ const SidebarDesktop: FunctionComponent<SidebarDesktopProps> = () => {
               <DialogCreateNewFeed key={index}>
                 <div
                   className={cn(
-                    'cursor-pointer flex items-center gap-x-2 text-base font-semibold hover:bg-neutral-600 py-3 px-3 rounded-lg transition-all duration-500 ease-in-out',
+                    'cursor-pointer flex items-center gap-x-2 text-base font-semibold  hover:bg-neutral-200 dark:hover:bg-neutral-600 py-3 px-3 rounded-lg transition-all duration-500 ease-in-out',
                   )}
                 >
                   {item.icon}
@@ -86,8 +86,8 @@ const SidebarDesktop: FunctionComponent<SidebarDesktopProps> = () => {
               href={item.url}
               key={index}
               className={cn(
-                'flex items-center gap-x-2 text-base font-semibold hover:bg-neutral-600 py-3 px-3 rounded-lg transition-all duration-500 ease-in-out',
-                pathname === item.url && 'bg-neutral-600',
+                'flex items-center gap-x-2 text-base font-semibold  hover:bg-neutral-200 dark:hover:bg-neutral-600 py-3 px-3 rounded-lg transition-all duration-500 ease-in-out',
+                pathname === item.url && 'dark:bg-neutral-600 bg-neutral-200',
               )}
             >
               {item.icon}
