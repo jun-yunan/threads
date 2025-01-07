@@ -67,6 +67,8 @@ export const getReplyByPostId = query({
       replies.map(async (reply) => {
         const author = await ctx.db.get(reply.authorId);
 
+        if (!author) return;
+
         const image = reply.image
           ? await ctx.storage.getUrl(reply.image)
           : undefined;
@@ -78,7 +80,7 @@ export const getReplyByPostId = query({
         const authorIncludeImageUrl = {
           ...author,
           imageUrl: authorImage!,
-        } as Doc<'users'>;
+        };
 
         return { ...reply, author: authorIncludeImageUrl, image };
       }),
