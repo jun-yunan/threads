@@ -67,7 +67,9 @@ export const getReplyByPostId = query({
       replies.map(async (reply) => {
         const author = await ctx.db.get(reply.authorId);
 
-        if (!author) return;
+        if (!author) {
+          throw new ConvexError('Author not found');
+        }
 
         const image = reply.image
           ? await ctx.storage.getUrl(reply.image)
