@@ -55,13 +55,14 @@ export default defineSchema({
     .index('by_parent_reply_id', ['parentReplyId'])
     .index('by_author_id', ['authorId']),
 
-  followers: defineTable({
-    follower: v.id('users'),
-    following: v.id('users'),
+  follows: defineTable({
+    followerId: v.id('users'), //ID người theo dõi
+    followeeId: v.id('users'), //ID người được theo dõi
     updatedAt: v.optional(v.number()),
   })
-    .index('by_follower', ['follower'])
-    .index('by_following', ['following']),
+    .index('by_follower_id', ['followerId'])
+    .index('by_followee_id', ['followeeId'])
+    .index('by_follower_id_followee_id', ['followerId', 'followeeId']),
 
   likes: defineTable({
     postId: v.id('posts'),

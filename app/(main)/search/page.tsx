@@ -11,7 +11,9 @@ import { useSearchUsers } from '@/features/users/api/use-search-users';
 import { api } from '@/convex/_generated/api';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
-import { Separator } from '@/components/ui/separator';
+import { handle } from 'hono/vercel';
+import ToggleFollow from '../_components/toggle-follow';
+import { useGetCurrentUser } from '@/features/users/api/use-get-current-user';
 
 interface SearchPageProps {}
 
@@ -29,6 +31,8 @@ const SearchPage: FunctionComponent<SearchPageProps> = () => {
 
   const { data: searchResults, isLoading: isLoadingSearchUsers } =
     useSearchUsers(searchTextDebounce);
+
+  const { data: currentUser } = useGetCurrentUser();
 
   useEffect(() => {
     if (searchTextDebounce.trim() !== '') {
@@ -60,7 +64,13 @@ const SearchPage: FunctionComponent<SearchPageProps> = () => {
           {isLoading ? (
             <Loader2 className="animate-spin" />
           ) : (
-            users?.map((user) => <RendererUser key={user._id} user={user} />)
+            users?.map((user) => (
+              <RendererUser
+                key={user._id}
+                currentUser={currentUser}
+                user={user}
+              />
+            ))
           )}
         </div>
       )}
@@ -94,9 +104,12 @@ const SearchPage: FunctionComponent<SearchPageProps> = () => {
                     <p className="text-sm text-muted-foreground">{user.name}</p>
                   </div>
                 </div>
-                <Button variant="outline">
-                  <UserPlus /> Theo dõi
-                </Button>
+                {currentUser && (
+                  <ToggleFollow
+                    followeeId={user._id}
+                    followerId={currentUser._id}
+                  />
+                )}
               </div>
             ))}
           </div>

@@ -5,12 +5,20 @@ import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { CalendarDays, Loader2, UserPlus } from 'lucide-react';
 import Link from 'next/link';
+import ToggleFollow from './toggle-follow';
+import { useGetCurrentUser } from '@/features/users/api/use-get-current-user';
 
 interface CardProfileProps {
   information: Doc<'users'>;
 }
 
 const CardProfile: FunctionComponent<CardProfileProps> = ({ information }) => {
+  const { data: currentUser, isLoading } = useGetCurrentUser();
+
+  if (isLoading || !currentUser) {
+    return <Loader2 className="animate-spin" />;
+  }
+
   return (
     <div className="flex flex-col gap-y-3">
       <div className="flex gap-x-4">
@@ -38,10 +46,13 @@ const CardProfile: FunctionComponent<CardProfileProps> = ({ information }) => {
           <p className="text-sm mt-2">0 Người theo dõi</p>
         </div>
       </div>
-      <Button size="sm" className="text-sm rounded-lg">
-        <UserPlus />
-        Theo dõi
-      </Button>
+
+      {currentUser._id !== information._id && (
+        <ToggleFollow
+          followeeId={information._id}
+          followerId={currentUser._id}
+        />
+      )}
     </div>
   );
 };

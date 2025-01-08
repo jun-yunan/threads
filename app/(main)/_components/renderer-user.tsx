@@ -6,12 +6,17 @@ import { Loader2, UserPlus } from 'lucide-react';
 import Link from 'next/link';
 import { FunctionComponent } from 'react';
 import { HoverCardProfile } from './hover-card-profile';
+import ToggleFollow from './toggle-follow';
 
 interface RendererUserProps {
   user: (typeof api.users.getUsersWithoutCurrentUser._returnType)[0];
+  currentUser?: typeof api.users.getCurrentUser._returnType;
 }
 
-const RendererUser: FunctionComponent<RendererUserProps> = ({ user }) => {
+const RendererUser: FunctionComponent<RendererUserProps> = ({
+  user,
+  currentUser,
+}) => {
   return (
     <div className="w-full flex flex-col gap-y-4">
       <div className="flex items-center gap-x-2">
@@ -35,9 +40,12 @@ const RendererUser: FunctionComponent<RendererUserProps> = ({ user }) => {
             >
               {user.username}
             </Link>
-            <Button variant="outline">
-              <UserPlus /> Theo dõi
-            </Button>
+            {currentUser && (
+              <ToggleFollow
+                followeeId={user._id}
+                followerId={currentUser._id}
+              />
+            )}
           </div>
           <p className="text-muted-foreground text-sm">{user.name}</p>
         </div>

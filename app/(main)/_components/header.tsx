@@ -24,7 +24,8 @@ import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useGetCurrentUser } from '@/features/users/api/use-get-current-user';
 
 interface HeaderProps {}
 
@@ -42,6 +43,10 @@ const Header: FunctionComponent<HeaderProps> = () => {
   const isMobile = useIsMobile();
 
   const pathname = usePathname();
+
+  const router = useRouter();
+
+  const { data: currentUser } = useGetCurrentUser();
 
   if (pathname === '/search') {
     return (
@@ -119,12 +124,14 @@ const Header: FunctionComponent<HeaderProps> = () => {
               <DropdownMenuRadioItem
                 className="py-3 text-sm lg:text-base font-semibold rounded-lg cursor-pointer"
                 value="Dành cho bạn"
+                onClick={() => router.push('/dashboard')}
               >
                 <p>Dành cho bạn</p>
               </DropdownMenuRadioItem>
               <DropdownMenuRadioItem
                 className="py-3 text-sm lg:text-base font-semibold rounded-lg cursor-pointer flex items-center justify-between"
                 value="Đang theo dõi"
+                onClick={() => router.push(`/following`)}
               >
                 <p>Đang theo dõi</p>
                 <UserPlus className="w-4 h-4 lg:w-6 lg:h-6" />
@@ -132,6 +139,7 @@ const Header: FunctionComponent<HeaderProps> = () => {
               <DropdownMenuRadioItem
                 className="py-3 text-sm lg:text-base font-semibold rounded-lg cursor-pointer flex items-center justify-between"
                 value="Đã thích"
+                onClick={() => router.push('/liked')}
               >
                 <p>Đã thích</p>
                 <Heart className="w-4 h-4 lg:w-6 lg:h-6" />
@@ -139,6 +147,7 @@ const Header: FunctionComponent<HeaderProps> = () => {
               <DropdownMenuRadioItem
                 className="py-3 text-sm lg:text-base font-semibold rounded-lg cursor-pointer flex items-center justify-between"
                 value="Đã lưu"
+                onClick={() => router.push('/saved')}
               >
                 <p>Đã lưu</p>
                 <Bookmark className="w-4 h-4 lg:w-6 lg:h-6" />
