@@ -181,11 +181,11 @@ const RendererPost: FunctionComponent<RendererPostProps> = ({
         >
           {post?.content}
         </Link>
-        {post?.file && (
-          <DialogReviewImage imageUrl={post.file}>
+        {post?.image && (
+          <DialogReviewImage imageUrl={post.image}>
             <div className="pl-12 w-full max-h-[500px] relative overflow-hidden cursor-pointer hover:opacity-75 duration-500 ease-in-out transition-all">
               <Image
-                src={post?.file}
+                src={post?.image}
                 alt=""
                 width={500}
                 height={500}

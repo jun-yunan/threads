@@ -6,8 +6,9 @@ import { Doc, Id } from '@/convex/_generated/dataModel';
 type RequestType = {
   content: string;
   published: boolean;
-  storageId?: Id<'_storage'>;
-  formatFile?: string;
+  image?: Id<'_storage'>;
+  location?: string;
+  tags?: string[];
 };
 
 type ResponseType =
@@ -47,8 +48,9 @@ export const useCreatePost = () => {
         const response = await mutation({
           content: values.content,
           published: values.published,
-          formatFile: values.formatFile,
-          storageId: values.storageId,
+          image: values.image,
+          location: values.location,
+          tags: values.tags,
         });
         options?.onSuccess?.(response);
         return response;

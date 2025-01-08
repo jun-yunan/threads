@@ -18,12 +18,9 @@ export default defineSchema({
     .index('by_username', ['username']),
 
   posts: defineTable({
+    authorId: v.id('users'),
     content: v.string(),
-    author: v.id('users'),
-    storageId: v.optional(v.id('_storage')),
-    formatFile: v.optional(v.string()),
-    comments: v.optional(v.array(v.id('comments'))),
-    likes: v.optional(v.array(v.id('users'))),
+    image: v.optional(v.id('_storage')),
     location: v.optional(v.string()),
     tags: v.optional(v.array(v.string())),
     published: v.boolean(),
@@ -31,10 +28,9 @@ export default defineSchema({
     isReply: v.optional(v.boolean()),
     updatedAt: v.number(),
   })
-    .index('by_author', ['author'])
+    .index('by_author_id', ['authorId'])
     .index('by_published', ['published'])
     .index('by_tags', ['tags'])
-    .index('by_comments', ['comments'])
     .index('by_is_reply', ['isReply']),
   reposts: defineTable({
     postId: v.id('posts'),

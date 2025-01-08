@@ -8,11 +8,12 @@ export const create = mutation({
   args: {
     content: v.string(),
     published: v.boolean(),
-    storageId: v.optional(v.id('_storage')),
-    formatFile: v.optional(v.string()),
+    image: v.optional(v.id('_storage')),
+    location: v.optional(v.string()),
+    tags: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
-    const { content, published, storageId, formatFile } = args;
+    const { content, published, image, location, tags } = args;
 
     if (!content || !published) {
       throw new ConvexError('Content and published are required');
@@ -34,11 +35,12 @@ export const create = mutation({
     }
 
     const post = await ctx.db.insert('posts', {
-      author: currentUser._id,
+      authorId: currentUser._id,
       content,
       published,
-      formatFile,
-      storageId,
+      image,
+      location,
+      tags,
       updatedAt: Date.now(),
     });
 
@@ -86,30 +88,30 @@ export const get = query({
         posts.page.map(async (post) => {
           const author = await ctx.db
             .query('users')
-            .withIndex('by_id', (q) => q.eq('_id', post.author))
+            .withIndex('by_id', (q) => q.eq('_id', post.authorId))
             .unique();
 
           if (!author) {
             return null;
           }
 
-          const file = post.storageId
-            ? await ctx.storage.getUrl(post.storageId)
+          const generatePostImageUrl = post.image
+            ? await ctx.storage.getUrl(post.image)
             : undefined;
 
-          const generateImageUrl = author.imageStorageId
+          const generateUserImageUrl = author.imageStorageId
             ? await ctx.storage.getUrl(author.imageStorageId)
             : author.imageUrl;
 
           const authorIncludeImageUrl = {
             ...author,
-            imageUrl: generateImageUrl!,
+            imageUrl: generateUserImageUrl!,
           };
 
           return {
             ...post,
             author: authorIncludeImageUrl,
-            file,
+            image: generatePostImageUrl,
           };
         }),
       ),
@@ -140,7 +142,7 @@ export const getByUsername = query({
 
     const posts = await ctx.db
       .query('posts')
-      .withIndex('by_author', (q) => q.eq('author', currentUser._id))
+      .withIndex('by_author_id', (q) => q.eq('authorId', currentUser._id))
       .order('desc')
       .paginate(args.paginationOpts);
 
@@ -150,30 +152,30 @@ export const getByUsername = query({
         posts.page.map(async (post) => {
           const author = await ctx.db
             .query('users')
-            .withIndex('by_id', (q) => q.eq('_id', post.author))
+            .withIndex('by_id', (q) => q.eq('_id', post.authorId))
             .unique();
 
           if (!author) {
             return null;
           }
 
-          const file = post.storageId
-            ? await ctx.storage.getUrl(post.storageId)
+          const generatePostImageUrl = post.image
+            ? await ctx.storage.getUrl(post.image)
             : undefined;
 
-          const generateImageUrl = author.imageStorageId
+          const generateUserImageUrl = author.imageStorageId
             ? await ctx.storage.getUrl(author.imageStorageId)
             : author.imageUrl;
 
           const authorIncludeImageUrl = {
             ...author,
-            imageUrl: generateImageUrl!,
+            imageUrl: generateUserImageUrl!,
           };
 
           return {
             ...post,
             author: authorIncludeImageUrl,
-            file,
+            image: generatePostImageUrl,
           };
         }),
       ),
@@ -208,8 +210,8 @@ export const getById = query({
       throw new ConvexError('Post not found');
     }
 
-    const generateImage = post.storageId
-      ? await ctx.storage.getUrl(post.storageId)
+    const generatePostImageUrl = post.image
+      ? await ctx.storage.getUrl(post.image)
       : undefined;
 
     const generateUserImageUrl = user.imageStorageId
@@ -221,7 +223,11 @@ export const getById = query({
       imageUrl: generateUserImageUrl!,
     };
 
-    return { ...post, file: generateImage, author: authorIncludeImageUrl };
+    return {
+      ...post,
+      image: generatePostImageUrl,
+      author: authorIncludeImageUrl,
+    };
   },
 });
 

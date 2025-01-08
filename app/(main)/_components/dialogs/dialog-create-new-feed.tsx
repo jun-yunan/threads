@@ -35,6 +35,8 @@ import { Id } from '@/convex/_generated/dataModel';
 
 const schemaCreateNewFeed = z.object({
   content: z.string().min(1).max(500),
+  location: z.string().optional(),
+  tags: z.array(z.string()).optional(),
 });
 
 export function DialogCreateNewFeed({
@@ -65,7 +67,7 @@ export function DialogCreateNewFeed({
   const onSubmit = async (data: z.infer<typeof schemaCreateNewFeed>) => {
     try {
       setIsPending(true);
-      let fileStorageId: Id<'_storage'> | undefined;
+      let image: Id<'_storage'> | undefined;
       if (file) {
         const postUrl = await generateUploadUrl({}, { throwError: true });
 
@@ -84,13 +86,14 @@ export function DialogCreateNewFeed({
         }
 
         const { storageId } = await result.json();
-        fileStorageId = storageId;
+        image = storageId;
       }
       mutationCreatePost({
         content: data.content,
         published: true,
-        formatFile: file?.type,
-        storageId: fileStorageId,
+        image,
+        location: data.location,
+        tags: data.tags,
       });
 
       toast.success('Đăng bài thành công');
