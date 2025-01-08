@@ -12,7 +12,7 @@ interface MainLayoutProps {
 
 const MainLayout: FunctionComponent<MainLayoutProps> = ({ children }) => {
   return (
-    <div className="relative flex w-full h-full justify-between">
+    <div className="relative flex w-full h-full justify-between overflow-x-hidden">
       <SidebarDesktop />
       <main className="relative w-full h-full flex flex-col items-center">
         <Header />

@@ -132,3 +132,85 @@ export const update = mutation({
     });
   },
 });
+
+export const getUsersWithoutCurrentUser = query({
+  args: {},
+  handler: async (context, args) => {
+    const identity = await context.auth.getUserIdentity();
+
+    if (!identity) {
+      throw new ConvexError('Unauthorized');
+    }
+
+    const currentUser = await context.db
+      .query('users')
+      .withIndex('by_clerkId', (q) => q.eq('clerkId', identity.subject))
+      .unique();
+
+    if (!currentUser) {
+      throw new ConvexError('User not found');
+    }
+
+    const users = await context.db.query('users').collect();
+
+    const userWithoutCurrentUser = users.filter(
+      (user) => user._id !== currentUser._id,
+    );
+
+    return await Promise.all(
+      userWithoutCurrentUser.map(async (user) => {
+        const generateImageUrl = user.imageStorageId
+          ? await context.storage.getUrl(user.imageStorageId)
+          : user.imageUrl;
+
+        return {
+          ...user,
+          imageUrl: generateImageUrl!,
+        };
+      }),
+    );
+  },
+});
+
+export const searchUsers = query({
+  args: {
+    searchText: v.string(),
+  },
+  handler: async (context, args) => {
+    const identity = await context.auth.getUserIdentity();
+
+    if (!identity) {
+      throw new ConvexError('Unauthorized');
+    }
+
+    const currentUser = await context.db
+      .query('users')
+      .withIndex('by_clerkId', (q) => q.eq('clerkId', identity.subject))
+      .unique();
+
+    if (!currentUser) {
+      throw new ConvexError('User not found');
+    }
+
+    const users = await context.db.query('users').collect();
+
+    const searchResult = users.filter(
+      (user) =>
+        user.name.toLowerCase().includes(args.searchText.toLowerCase()) ||
+        user.username.toLowerCase().includes(args.searchText.toLowerCase()),
+    );
+
+    return Promise.all(
+      searchResult.map(async (user) => {
+        const generateImageUrl = user.imageStorageId
+          ? await context.storage.getUrl(user.imageStorageId)
+          : user.imageUrl;
+
+        return {
+          ...user,
+          imageUrl: generateImageUrl!,
+        };
+      }),
+    );
+  },
+});

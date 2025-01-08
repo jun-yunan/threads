@@ -47,7 +47,7 @@ const NavMobile: FunctionComponent<NavMobileProps> = () => {
         if (item.title === 'Profile') {
           return (
             <Link
-              href={item.url}
+              href={`/${currentUser?.username}`}
               key={index}
               className={cn(
                 'flex items-center gap-x-2 text-base font-semibold hover:bg-neutral-200 dark:hover:bg-neutral-600 py-3 px-3 rounded-lg transition-all duration-500 ease-in-out',

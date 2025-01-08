@@ -24,6 +24,7 @@ import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 interface HeaderProps {}
 
@@ -40,6 +41,55 @@ const Header: FunctionComponent<HeaderProps> = () => {
 
   const isMobile = useIsMobile();
 
+  const pathname = usePathname();
+
+  if (pathname === '/search') {
+    return (
+      <div
+        className={cn(
+          'fixed top-0 right-0 left-0 z-10 w-full h-16 flex items-center justify-center',
+          theme === 'dark' ? 'bg-black/90' : 'bg-white',
+          isMobile && 'flex items-center justify-between px-2',
+        )}
+      >
+        <div className="flex items-center gap-x-2 text-base lg:text-lg font-semibold">
+          <p>Tìm kiếm</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (pathname === '/favorites') {
+    return (
+      <div
+        className={cn(
+          'fixed top-0 right-0 left-0 z-10 w-full h-16 flex items-center justify-center',
+          theme === 'dark' ? 'bg-black/90' : 'bg-white',
+          isMobile && 'flex items-center justify-between px-2',
+        )}
+      >
+        <div className="flex items-center gap-x-2 text-base lg:text-lg font-semibold">
+          <p>Đã thích</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (pathname.startsWith('/@')) {
+    return (
+      <div
+        className={cn(
+          'fixed top-0 right-0 left-0 z-10 w-full h-16 flex items-center justify-center',
+          theme === 'dark' ? 'bg-black/90' : 'bg-white',
+          isMobile && 'flex items-center justify-between px-2',
+        )}
+      >
+        <div className="flex items-center gap-x-2 text-base lg:text-lg font-semibold">
+          <p>Trang cá nhân</p>
+        </div>
+      </div>
+    );
+  }
   return (
     <>
       <div
@@ -109,9 +159,37 @@ const Header: FunctionComponent<HeaderProps> = () => {
           </DropdownMenuContent>
         </DropdownMenu>
         {isMobile && (
-          <Button className="" variant="ghost" size="icon">
-            <Menu />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button className="" variant="ghost" size="icon">
+                <Menu />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-52 p-3">
+              <DropdownMenuItem className="py-3 text-sm lg:text-base font-semibold rounded-lg cursor-pointer flex items-center justify-between">
+                <p>Giao diện</p>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="py-3 text-sm lg:text-base font-semibold rounded-lg cursor-pointer flex items-center justify-between">
+                <p>Thông tin chi tiết</p>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="py-3 text-sm lg:text-base font-semibold rounded-lg cursor-pointer flex items-center justify-between">
+                <p>Cài đặt</p>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="py-3 text-sm lg:text-base font-semibold rounded-lg cursor-pointer flex items-center justify-between">
+                <p>Đã lưu</p>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="py-3 text-sm lg:text-base font-semibold rounded-lg cursor-pointer flex items-center justify-between">
+                <p>Đã thích</p>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="py-3 text-sm lg:text-base font-semibold rounded-lg cursor-pointer flex items-center justify-between">
+                <p>Báo cáo sự cố</p>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="text-rose-600 focus:text-rose-600 py-3 text-sm lg:text-base font-semibold rounded-lg cursor-pointer flex items-center justify-between">
+                <p>Đăng xuất</p>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
       </div>
     </>
